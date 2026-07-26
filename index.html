@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Caveat:wght@500;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --blue:#8FB0FF;
@@ -1026,7 +1028,7 @@
     <h2>Our little bucket list</h2>
 
     <div class="bucket-block">
-      <h3>🌏 Asia, country by country</h3>
+      <h3>🌏 Every country we will visit together</h3>
       <div class="chip-grid" id="asia-list"></div>
       <div class="add-row">
         <input type="text" id="asia-add-input" placeholder="add a place...">
@@ -1104,6 +1106,19 @@ And now, you should answer the questions below. Have fun, mwah! ❤️😘</p>
 <div id="bouquet-overlay"></div>
 
 <script>
+/* ============ FIREBASE (shared cross-device bucket list) ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyC77rRqbjoqXkS7n0ICgsXXWwUyUCfS5IU",
+  authDomain: "fandz-63761.firebaseapp.com",
+  projectId: "fandz-63761",
+  storageBucket: "fandz-63761.firebasestorage.app",
+  messagingSenderId: "62072564012",
+  appId: "1:62072564012:web:2c3d1c35986361e8c36489"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const bucketDocRef = db.collection('shared').doc('bucketlist');
+
 /* ============ FLOATING EMOJI BACKGROUND ============ */
 const flowers = ['🌸','🌺','🌻','🌹','🌷','🌼','💮','🏵️','🪷'];
 const hearts = ['❤️','🧡','💛','💚','💙','💜','🩷','🩵','🩶','💕','💞','💓','💗','💖','💘','💝','❣️','💟'];
@@ -1268,35 +1283,59 @@ function getOffsetHours(timeZone, date){
 }
 setInterval(updateTZ, 30000);
 
-/* ============ BUCKET LIST ============ */
-const asiaCountries = ['Japan','South Korea','Thailand','Vietnam','Indonesia','Philippines','Singapore','Taiwan','China','India','Nepal','Sri Lanka','Cambodia','Laos','Maldives','UAE','Turkey','Jordan','Malaysia','Hong Kong','Mongolia','Bhutan','Georgia','Uzbekistan'];
+/* ============ BUCKET LIST (synced across devices via Firebase) ============ */
+const asiaCountries = ['Japan','South Korea','Thailand','Vietnam','Indonesia','Philippines','Singapore','Taiwan','China','India','Nepal','Sri Lanka','Cambodia','Laos','Maldives','UAE','Turkey','Jordan','Malaysia','Hong Kong','Mongolia','Bhutan','Georgia','Uzbekistan','Spain'];
 const petsList = ['Poodle 🐩','Doberman 🐕‍🦺','Golden Retriever 🐕'];
 const foods = ['Bulgogi 🥩','Seafood 🦐','Pasta 🍝','Cheesecake 🍰','Oreo cake 🍫','Crustless pie 🥧'];
 
-function loadState(key, fallback){
-  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-  catch(e){ return fallback; }
-}
-function saveState(key, val){
-  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+let bucketData = { asiaChecked:{}, asiaCustom:[], petsChecked:{}, petsCustom:[], foodCustom:[] };
+let bucketReady = false;
+const bucketListeners = [];
+
+function ensureShape(data){
+  data = data || {};
+  return {
+    asiaChecked: data.asiaChecked || {},
+    asiaCustom: data.asiaCustom || [],
+    petsChecked: data.petsChecked || {},
+    petsCustom: data.petsCustom || [],
+    foodCustom: data.foodCustom || []
+  };
 }
 
-function buildChipList(container, builtins, storeKey, customKey, checkable){
+function saveBucketData(){
+  bucketDocRef.set(bucketData).catch(e => console.error('Firestore save failed:', e));
+}
+
+function subscribeBucketData(){
+  bucketDocRef.onSnapshot(snap => {
+    bucketData = ensureShape(snap.exists ? snap.data() : {});
+    bucketReady = true;
+    bucketListeners.forEach(fn => fn());
+  }, err => {
+    console.error('Firestore listen failed:', err);
+    bucketReady = true;
+    bucketListeners.forEach(fn => fn());
+  });
+}
+
+function buildChipList(container, builtins, checkedKey, customKey, checkable){
   if(checkable === undefined) checkable = true;
-  const checked = loadState(storeKey, {});
-  const custom = loadState(customKey, []);
 
   function renderAll(){
+    const checked = bucketData[checkedKey] || {};
+    const custom = bucketData[customKey] || [];
     container.innerHTML = '';
     builtins.forEach((item,i)=>{
-      const id = storeKey + '-' + i;
+      const id = 'b' + i;
       const label = document.createElement('label');
       label.className = 'chip';
       if(checkable){
-        label.innerHTML = `<input type="checkbox" id="${id}" ${checked[id]?'checked':''}><span class="box"></span>${item}`;
+        label.innerHTML = `<input type="checkbox" ${checked[id]?'checked':''}><span class="box"></span>${item}`;
         label.querySelector('input').addEventListener('change', e=>{
-          checked[id] = e.target.checked;
-          saveState(storeKey, checked);
+          bucketData[checkedKey] = bucketData[checkedKey] || {};
+          bucketData[checkedKey][id] = e.target.checked;
+          saveBucketData();
         });
       } else {
         label.innerHTML = `<span>${item}</span>`;
@@ -1304,34 +1343,36 @@ function buildChipList(container, builtins, storeKey, customKey, checkable){
       container.appendChild(label);
     });
     custom.forEach((item, i)=>{
-      const id = storeKey + '-custom-' + i;
+      const id = 'c' + i;
       const label = document.createElement('label');
       label.className = 'chip';
       if(checkable){
-        label.innerHTML = `<input type="checkbox" id="${id}" ${checked[id]?'checked':''}><span class="box"></span>${item}<span class="remove-x" data-i="${i}">×</span>`;
+        label.innerHTML = `<input type="checkbox" ${checked[id]?'checked':''}><span class="box"></span>${item}<span class="remove-x">×</span>`;
         label.querySelector('input').addEventListener('change', e=>{
-          checked[id] = e.target.checked;
-          saveState(storeKey, checked);
+          bucketData[checkedKey] = bucketData[checkedKey] || {};
+          bucketData[checkedKey][id] = e.target.checked;
+          saveBucketData();
         });
       } else {
-        label.innerHTML = `<span>${item}</span><span class="remove-x" data-i="${i}">×</span>`;
+        label.innerHTML = `<span>${item}</span><span class="remove-x">×</span>`;
       }
       label.querySelector('.remove-x').addEventListener('click', e=>{
         e.preventDefault();
-        custom.splice(i,1);
-        saveState(customKey, custom);
-        renderAll();
+        bucketData[customKey].splice(i,1);
+        saveBucketData();
       });
       container.appendChild(label);
     });
   }
+
+  bucketListeners.push(renderAll);
   renderAll();
 
   return function addItem(text){
     if(!text.trim()) return;
-    custom.push(text.trim());
-    saveState(customKey, custom);
-    renderAll();
+    bucketData[customKey] = bucketData[customKey] || [];
+    bucketData[customKey].push(text.trim());
+    saveBucketData();
   };
 }
 
@@ -1506,6 +1547,7 @@ function launchBouquet(){
 function initAfterUnlock(){
   tickCountdowns();
   updateTZ();
+  subscribeBucketData();
   const addAsia = buildChipList(document.getElementById('asia-list'), asiaCountries, 'asiaChecked', 'asiaCustom', true);
   const addPets = buildChipList(document.getElementById('pets-list'), petsList, 'petsChecked', 'petsCustom', true);
   const addFood = buildChipList(document.getElementById('food-list'), foods, 'foodChecked', 'foodCustom', false);

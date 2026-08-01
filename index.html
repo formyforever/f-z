@@ -206,11 +206,11 @@
   /* ---------- countdown ---------- */
   .countdown-grid{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(3,1fr);
     gap:24px;
     margin-top:30px;
   }
-  @media(max-width:680px){.countdown-grid{grid-template-columns:1fr;}}
+  @media(max-width:900px){.countdown-grid{grid-template-columns:1fr;}}
   .cd-box{
     text-align:center;
   }
@@ -237,6 +237,102 @@
     display:block;
   }
   .cd-unit .l{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
+
+  /* ---------- girlfriend's day choice ---------- */
+  #gfday{text-align:center;}
+  .gf-choice-btns{
+    display:flex;
+    justify-content:center;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-top:26px;
+  }
+  .gf-btn{
+    padding:15px 32px;
+    border-radius:999px;
+    border:none;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    background:linear-gradient(120deg,var(--red),var(--purple));
+    color:#1a1130;
+    box-shadow:0 14px 30px -12px rgba(255,107,133,.45);
+    transition:transform .15s ease;
+  }
+  .gf-btn:hover{transform:translateY(-2px);}
+  #gf-reveal{
+    margin-top:26px;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+    font-size:1.3rem;
+    color:var(--ink);
+    min-height:20px;
+  }
+
+  /* ---------- growing tree ---------- */
+  .tree-sub{color:var(--ink-soft);margin-top:8px;margin-bottom:26px;max-width:520px;}
+  .tree-card{
+    text-align:center;
+    padding:20px clamp(10px,3vw,40px) 30px;
+  }
+  #tree-svg{width:100%;max-width:520px;height:auto;}
+  .tree-flower{
+    opacity:0;
+    transform-origin:center;
+    animation:bloomIn .6s ease forwards;
+  }
+  @keyframes bloomIn{
+    0%{opacity:0; transform:scale(0);}
+    70%{opacity:1; transform:scale(1.15);}
+    100%{opacity:1; transform:scale(1);}
+  }
+  .tree-caption{
+    margin-top:12px;
+    font-size:.95rem;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .tree-caption span{color:var(--red);font-family:'Playfair Display',serif;font-size:1.2rem;}
+
+  /* ---------- 100 reasons ---------- */
+  .reasons-card{text-align:center;}
+  .reasons-count{
+    color:var(--ink-soft);
+    font-size:.85rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    margin-bottom:16px;
+  }
+  .reasons-text{
+    font-family:'Playfair Display',serif;
+    font-size:1.4rem;
+    line-height:1.5;
+    min-height:90px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink);
+  }
+  .reasons-nav{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-top:24px;
+    flex-wrap:wrap;
+  }
+  .reasons-btn{
+    border:1.5px solid var(--card-border);
+    background:rgba(255,255,255,.05);
+    color:var(--ink);
+    padding:10px 20px;
+    border-radius:999px;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:.85rem;
+    cursor:pointer;
+  }
+  .reasons-btn:hover{border-color:var(--purple);}
 
   /* ---------- map ---------- */
   .map-wrap{
@@ -698,6 +794,46 @@
     #music-widget{ top:auto; bottom:18px; right:14px; }
     #music-widget .music-title{ max-width:38vw; }
   }
+
+  .countdown-grid-single{
+    max-width:320px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .hearts-wrap{
+    text-align:center;
+    padding-bottom:20px;
+  }
+  .hearts-prompt{
+    color:var(--ink-soft);
+    font-size:.95rem;
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  .hearts-row{
+    display:flex;
+    justify-content:center;
+    gap:34px;
+  }
+  .heart-choice{
+    background:none;
+    border:none;
+    font-size:3rem;
+    cursor:pointer;
+    line-height:1;
+    padding:6px;
+    transition:transform .18s ease;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));
+  }
+  .heart-choice:hover{transform:scale(1.15);}
+  .heart-choice:active{transform:scale(.95);}
+  .hearts-nudge{
+    margin-top:14px;
+    font-size:.85rem;
+    color:var(--ink-soft);
+    min-height:20px;
+    font-style:italic;
+  }
 </style>
 </head>
 <body>
@@ -1090,6 +1226,15 @@ And now, you should answer the questions below. Have fun, mwah! ❤️😘</p>
     </div>
   </section>
 
+<div class="hearts-wrap" id="gday-hearts-wrap">
+  <p class="hearts-prompt">Click the heart on the right for a surprise 👉</p>
+  <div class="hearts-row">
+    <button class="heart-choice" id="heart-left" aria-label="Red heart">❤️</button>
+    <button class="heart-choice" id="heart-right" aria-label="Pink heart">💗</button>
+  </div>
+  <p class="hearts-nudge" id="hearts-nudge"></p>
+</div>
+
   <section id="finalquestion" class="hidden">
     <h2 id="final-question-text">Will you be my girlfriend, and will you accept me to be your boyfriend?</h2>
     <div class="final-btns" id="final-btns">
@@ -1100,24 +1245,29 @@ And now, you should answer the questions below. Have fun, mwah! ❤️😘</p>
     <div id="final-answer"></div>
   </section>
 
-  <footer>F & Z ❤️</footer>
+<footer>F & Z ❤️</footer>
 </div>
 
 <div id="bouquet-overlay"></div>
-
 <script>
 /* ============ FIREBASE (shared cross-device bucket list) ============ */
-const firebaseConfig = {
-  apiKey: "AIzaSyC77rRqbjoqXkS7n0ICgsXXWwUyUCfS5IU",
-  authDomain: "fandz-63761.firebaseapp.com",
-  projectId: "fandz-63761",
-  storageBucket: "fandz-63761.firebasestorage.app",
-  messagingSenderId: "62072564012",
-  appId: "1:62072564012:web:2c3d1c35986361e8c36489"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const bucketDocRef = db.collection('shared').doc('bucketlist');
+let db = null;
+let bucketDocRef = null;
+try{
+  const firebaseConfig = {
+    apiKey: "AIzaSyC77rRqbjoqXkS7n0ICgsXXWwUyUCfS5IU",
+    authDomain: "fandz-63761.firebaseapp.com",
+    projectId: "fandz-63761",
+    storageBucket: "fandz-63761.firebasestorage.app",
+    messagingSenderId: "62072564012",
+    appId: "1:62072564012:web:2c3d1c35986361e8c36489"
+  };
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  bucketDocRef = db.collection('shared').doc('bucketlist');
+}catch(e){
+  console.error('Firebase failed to load, bucket list will run in local-only mode:', e);
+}
 
 /* ============ FLOATING EMOJI BACKGROUND ============ */
 const flowers = ['🌸','🌺','🌻','🌹','🌷','🌼','💮','🏵️','🪷'];
@@ -1147,17 +1297,17 @@ setInterval(spawnEmoji, 900);
 const passInput = document.getElementById('passcode-input');
 const unlockBtn = document.getElementById('unlock-btn');
 const lockError = document.getElementById('lock-error');
-const lockscreen = document.getElementById('lockscreen');
-const site = document.getElementById('site');
+const lockscreenEl = document.getElementById('lockscreen');
+const siteEl = document.getElementById('site');
 
 function tryUnlock(){
   if(passInput.value.trim() === '22'){
     attemptPlayMusic();
-    lockscreen.style.transition = 'opacity .5s ease';
-    lockscreen.style.opacity = '0';
+    lockscreenEl.style.transition = 'opacity .5s ease';
+    lockscreenEl.style.opacity = '0';
     setTimeout(()=>{
-      lockscreen.classList.add('hidden');
-      site.classList.remove('hidden');
+      lockscreenEl.classList.add('hidden');
+      siteEl.classList.remove('hidden');
       initAfterUnlock();
     }, 480);
   } else {
@@ -1304,19 +1454,33 @@ function ensureShape(data){
 }
 
 function saveBucketData(){
-  bucketDocRef.set(bucketData).catch(e => console.error('Firestore save failed:', e));
+  if(!bucketDocRef) return;
+  try{
+    bucketDocRef.set(bucketData).catch(e => console.error('Firestore save failed:', e));
+  }catch(e){ console.error('Firestore save failed:', e); }
 }
 
 function subscribeBucketData(){
-  bucketDocRef.onSnapshot(snap => {
-    bucketData = ensureShape(snap.exists ? snap.data() : {});
+  if(!bucketDocRef){
     bucketReady = true;
     bucketListeners.forEach(fn => fn());
-  }, err => {
-    console.error('Firestore listen failed:', err);
+    return;
+  }
+  try{
+    bucketDocRef.onSnapshot(snap => {
+      bucketData = ensureShape(snap.exists ? snap.data() : {});
+      bucketReady = true;
+      bucketListeners.forEach(fn => fn());
+    }, err => {
+      console.error('Firestore listen failed:', err);
+      bucketReady = true;
+      bucketListeners.forEach(fn => fn());
+    });
+  }catch(e){
+    console.error('Firestore listen failed:', e);
     bucketReady = true;
     bucketListeners.forEach(fn => fn());
-  });
+  }
 }
 
 function buildChipList(container, builtins, checkedKey, customKey, checkable){
@@ -1526,6 +1690,21 @@ yesBtn.addEventListener('click', ()=>{
   launchBouquet();
 });
 
+const heartLeft = document.getElementById('heart-left');
+const heartRight = document.getElementById('heart-right');
+const heartsNudge = document.getElementById('hearts-nudge');
+
+heartLeft.addEventListener('click', ()=>{
+  heartsNudge.textContent = "Not this one 👉 try the pink one!";
+  heartLeft.style.transform = 'scale(.8) rotate(-8deg)';
+  setTimeout(()=>{ heartLeft.style.transform = ''; }, 220);
+});
+
+heartRight.addEventListener('click', ()=>{
+  heartsNudge.textContent = "Taking you there... 💗";
+  setTimeout(()=>{ window.location.href = 'girlfriend-day.html'; }, 500);
+});
+
 function launchBouquet(){
   const flowerEmojis = ['💐','🌹','🌸','🌷','🌺','💕','💖','🌼'];
   const overlay = document.getElementById('bouquet-overlay');
@@ -1544,17 +1723,28 @@ function launchBouquet(){
 }
 
 /* ============ INIT AFTER UNLOCK ============ */
+function safeRun(fn, label){
+  try{ fn(); }
+  catch(e){ console.error('Init step failed (' + label + '):', e); }
+}
+
 function initAfterUnlock(){
-  tickCountdowns();
-  updateTZ();
-  subscribeBucketData();
-  const addAsia = buildChipList(document.getElementById('asia-list'), asiaCountries, 'asiaChecked', 'asiaCustom', true);
-  const addPets = buildChipList(document.getElementById('pets-list'), petsList, 'petsChecked', 'petsCustom', true);
-  const addFood = buildChipList(document.getElementById('food-list'), foods, 'foodChecked', 'foodCustom', false);
-  initAddRow('asia-add-input','asia-add-btn', addAsia);
-  initAddRow('pets-add-input','pets-add-btn', addPets);
-  initAddRow('food-add-input','food-add-btn', addFood);
-  renderPuzzle();
+  safeRun(tickCountdowns, 'tickCountdowns');
+  safeRun(updateTZ, 'updateTZ');
+  safeRun(subscribeBucketData, 'subscribeBucketData');
+  safeRun(()=>{
+    const addAsia = buildChipList(document.getElementById('asia-list'), asiaCountries, 'asiaChecked', 'asiaCustom', true);
+    initAddRow('asia-add-input','asia-add-btn', addAsia);
+  }, 'asiaList');
+  safeRun(()=>{
+    const addPets = buildChipList(document.getElementById('pets-list'), petsList, 'petsChecked', 'petsCustom', true);
+    initAddRow('pets-add-input','pets-add-btn', addPets);
+  }, 'petsList');
+  safeRun(()=>{
+    const addFood = buildChipList(document.getElementById('food-list'), foods, 'foodChecked', 'foodCustom', false);
+    initAddRow('food-add-input','food-add-btn', addFood);
+  }, 'foodList');
+  safeRun(renderPuzzle, 'renderPuzzle');
 }
 </script>
 </body>

@@ -285,6 +285,15 @@
     70%{opacity:1; transform:scale(1.15);}
     100%{opacity:1; transform:scale(1);}
   }
+  .petal-fallen{
+    opacity:0;
+    transform-origin:center;
+    animation:petalFall .8s ease forwards;
+  }
+  @keyframes petalFall{
+    0%{opacity:0; transform:translateY(-30px) rotate(0deg) scale(.7);}
+    100%{opacity:.9; transform:translateY(0) rotate(25deg) scale(1);}
+  }
   .tree-caption{
     margin-top:12px;
     font-size:.95rem;
@@ -292,6 +301,118 @@
     font-weight:600;
   }
   .tree-caption span{color:var(--red);font-family:'Playfair Display',serif;font-size:1.2rem;}
+  #fallen-caption{color:var(--ink-soft);font-size:.95rem;}
+  #fallen-caption b{color:var(--purple);font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;}
+
+  /* ---------- milestones ---------- */
+  .milestone-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:16px;
+    margin-top:24px;
+  }
+  .milestone-card{
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--card-border);
+    border-radius:20px;
+    padding:22px 16px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .milestone-card.reached{
+    border-color:rgba(255,107,133,.4);
+    background:linear-gradient(160deg,rgba(255,107,133,.1),rgba(198,168,255,.08));
+  }
+  .milestone-card.current{
+    border-color:var(--red);
+    box-shadow:0 0 0 1px var(--red), 0 14px 30px -14px rgba(255,107,133,.5);
+  }
+  .milestone-card.locked{opacity:.45;}
+  .milestone-icon{font-size:1.6rem;margin-bottom:8px;display:block;}
+  .milestone-label{
+    font-family:'Playfair Display',serif;
+    font-weight:700;
+    font-size:1.05rem;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .milestone-date{
+    font-size:.72rem;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .milestone-msg{
+    font-size:.78rem;
+    color:var(--ink-soft);
+    font-style:italic;
+    line-height:1.4;
+  }
+  .milestone-badge{
+    position:absolute;
+    top:8px;
+    right:10px;
+    font-size:.62rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--red);
+  }
+
+  /* ---------- open when ---------- */
+  .envelope-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:14px;
+    margin-top:24px;
+  }
+  .envelope-card{
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--card-border);
+    border-radius:18px;
+    padding:22px 16px;
+    text-align:center;
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .envelope-card:hover{transform:translateY(-2px);border-color:var(--purple);}
+  .envelope-face{
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .envelope-card.open .envelope-face{
+    flex-direction:row;
+    justify-content:flex-start;
+    gap:10px;
+  }
+  .envelope-icon{font-size:1.8rem;}
+  .envelope-card.open .envelope-icon{font-size:1.3rem;}
+  .envelope-label{
+    font-family:'Playfair Display',serif;
+    font-weight:700;
+    font-size:.95rem;
+    color:var(--ink);
+    line-height:1.3;
+  }
+  .envelope-letter{
+    display:none;
+    text-align:left;
+    font-family:'Caveat',cursive;
+    font-size:1.3rem;
+    line-height:1.55;
+    color:var(--ink);
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px dashed var(--card-border);
+  }
+  .envelope-card.open{
+    grid-column:1 / -1;
+    text-align:left;
+    cursor:default;
+  }
+  .envelope-card.open .envelope-letter{display:block;}
 
   /* ---------- 100 reasons ---------- */
   .reasons-card{text-align:center;}
@@ -739,6 +860,46 @@
     color:var(--ink-soft);
     font-size:.85rem;
   }
+  .footer-flower{
+    cursor:pointer;
+    display:inline-block;
+    transition:transform .15s ease;
+  }
+  .footer-flower:hover{transform:scale(1.2) rotate(10deg);}
+  .footer-22{
+    cursor:pointer;
+    display:inline-block;
+    opacity:.55;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .footer-22:hover{transform:scale(1.15); opacity:.9;}
+
+  #secret-toast{
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translateX(-50%) translateY(20px);
+    background:rgba(20,14,40,.92);
+    border:1px solid rgba(255,107,133,.4);
+    border-radius:16px;
+    padding:16px 24px;
+    max-width:min(86vw,380px);
+    text-align:center;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+    font-size:1rem;
+    color:var(--ink);
+    box-shadow:0 20px 50px -20px rgba(0,0,0,.7);
+    z-index:200;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  #secret-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
+  }
 
   #music-widget{
     position:fixed;
@@ -793,6 +954,31 @@
     #music-widget .music-title{ max-width:38vw; }
   }
 
+  #openwhen-fab{
+    position:fixed;
+    left:18px;
+    bottom:18px;
+    z-index:45;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(20,14,40,.85);
+    border:1px solid rgba(255,107,133,.4);
+    border-radius:999px;
+    padding:11px 18px;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:.82rem;
+    color:var(--ink);
+    text-decoration:none;
+    cursor:pointer;
+    backdrop-filter:blur(10px);
+    box-shadow:0 12px 30px -14px rgba(0,0,0,.6);
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  #openwhen-fab:hover{transform:translateY(-2px);border-color:var(--purple);}
+  #openwhen-fab .fab-icon{font-size:1rem;}
+
   .countdown-grid-single{
     max-width:320px;
     margin-left:auto;
@@ -821,6 +1007,8 @@
 <body>
 
 <div id="floating-emojis"></div>
+
+<a href="#openwhen" id="openwhen-fab" class="hidden"><span class="fab-icon">💌</span> Open When...</a>
 
 <div id="yt-player-slot" style="position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;bottom:0;left:0;"></div>
 
@@ -871,10 +1059,24 @@
   <section id="tree">
     <div class="eyebrow">us, growing</div>
     <h2>A garden that grows with us</h2>
-    <p class="tree-sub">Every couple of days we're together, something new blooms. Come back and watch it grow.</p>
+    <p class="tree-sub">Every couple of days we're together, something new blooms. Once the garden's full, petals start to fall and new ones take their place. Come back and watch it grow.</p>
     <div class="card tree-card">
       <svg viewBox="0 0 600 480" id="tree-svg" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="300" cy="465" rx="180" ry="14" fill="rgba(0,0,0,.25)"/>
+
+        <g class="bush bush-left">
+          <ellipse cx="120" cy="452" rx="72" ry="16" fill="rgba(0,0,0,.2)"/>
+          <ellipse cx="90" cy="422" rx="52" ry="40" fill="#2e4a2c"/>
+          <ellipse cx="150" cy="430" rx="58" ry="44" fill="#2e4a2c"/>
+          <ellipse cx="120" cy="402" rx="48" ry="36" fill="#3a5c37"/>
+        </g>
+        <g class="bush bush-right">
+          <ellipse cx="480" cy="452" rx="72" ry="16" fill="rgba(0,0,0,.2)"/>
+          <ellipse cx="450" cy="422" rx="52" ry="40" fill="#2e4a2c"/>
+          <ellipse cx="510" cy="430" rx="58" ry="44" fill="#2e4a2c"/>
+          <ellipse cx="480" cy="402" rx="48" ry="36" fill="#3a5c37"/>
+        </g>
+
         <path d="M300,480 C292,400 296,340 300,260 C304,340 308,400 300,480 Z" fill="#4a3524"/>
         <path d="M300,300 C260,270 220,250 170,235" stroke="#4a3524" stroke-width="9" fill="none" stroke-linecap="round"/>
         <path d="M300,290 C340,258 385,240 440,222" stroke="#4a3524" stroke-width="9" fill="none" stroke-linecap="round"/>
@@ -886,9 +1088,26 @@
         <path d="M245,130 C230,110 218,95 205,75" stroke="#4a3524" stroke-width="5" fill="none" stroke-linecap="round"/>
         <path d="M365,120 C380,100 392,85 405,65" stroke="#4a3524" stroke-width="5" fill="none" stroke-linecap="round"/>
         <g id="tree-flowers"></g>
+        <g id="bush-left-flowers"></g>
+        <g id="bush-right-flowers"></g>
+        <g id="fallen-petals"></g>
       </svg>
-      <div class="tree-caption"><span id="tree-count">0</span> flowers bloomed so far 🌸</div>
+      <div class="tree-caption"><span id="tree-count">0</span> flowers blooming<span id="fallen-caption"></span> 🌸</div>
     </div>
+  </section>
+
+  <section id="milestones">
+    <div class="eyebrow">how far we've come</div>
+    <h2>Every milestone, marked</h2>
+    <p class="tree-sub">Counting from the day we met, July 17, 2026.</p>
+    <div class="milestone-grid" id="milestone-grid"></div>
+  </section>
+
+  <section id="openwhen">
+    <div class="eyebrow">for the hard days, and the good ones</div>
+    <h2>Open when...</h2>
+    <p class="tree-sub">A few little letters for whenever you need one. Tap one to open it.</p>
+    <div class="envelope-grid" id="envelope-grid"></div>
   </section>
 
   <section id="reasons">
@@ -932,10 +1151,11 @@ Happy Girlfriend's Day, my baby, to the one and only forever best girlfriend and
 <div class="page-link-wrap">
   <a class="page-link" href="index.html">← Back to where it all began</a>
 </div>
-<footer>F & Z ❤️</footer>
+<footer>F & Z <span id="footer-flower" class="footer-flower">🌸</span> <span id="footer-22" class="footer-22">22</span></footer>
 </div>
 
 <div id="bouquet-overlay"></div>
+<div id="secret-toast"></div>
 <script>
 /* ============ FLOATING EMOJI BACKGROUND ============ */
 const flowers = ['🌸','🌺','🌻','🌹','🌷','🌼','💮','🏵️','🪷'];
@@ -976,6 +1196,7 @@ function tryUnlock(){
     setTimeout(()=>{
       lockscreenEl.classList.add('hidden');
       siteEl.classList.remove('hidden');
+      document.getElementById('openwhen-fab').classList.remove('hidden');
       initAfterUnlock();
     }, 480);
   } else {
@@ -1101,28 +1322,180 @@ function setupGfDay(){
 
 /* ============ GROWING TREE ============ */
 const treePoints = [[485.7,199.9],[436.8,231.9],[300.7,188.8],[401.9,225.9],[237.6,264.2],[357.9,157.2],[291.5,161.6],[342.6,166.7],[207.9,71.0],[270.5,199.3],[334.2,178.7],[404.6,71.1],[302.6,104.0],[118.8,209.7],[507.0,196.5],[361.5,244.5],[409.2,61.0],[438.9,211.3],[513.2,191.2],[215.6,248.1],[494.8,194.8],[292.5,175.4],[418.7,227.3],[409.9,66.1],[237.2,126.1],[104.7,196.0],[377.0,243.9],[207.5,91.1],[164.3,246.1],[293.7,147.2],[443.1,212.2],[164.3,233.1],[387.9,231.7],[129.3,211.5],[225.5,89.5],[224.3,261.6],[196.7,73.7],[329.5,192.1],[260.9,174.3],[350.3,137.8],[304.3,132.2],[253.0,162.7],[198.6,254.3],[513.8,182.4],[112.6,197.4],[391.4,84.5],[369.4,119.2],[271.2,184.8],[174.3,239.9],[189.1,240.2],[364.8,126.6],[298.1,116.4],[363.5,113.1],[294.8,107.7],[253.9,124.9],[98.1,202.2],[235.5,138.7],[261.5,145.4],[206.7,80.2],[390.0,72.4]];
+const bushLeftPoints = [[74.0,421.2],[159.7,398.8],[138.5,439.5],[81.7,385.7],[151.4,425.6],[112.0,398.1],[180.6,407.6],[96.1,409.2],[148.6,383.0],[106.3,432.3],[129.2,392.5],[169.8,435.5],[116.0,373.2],[117.5,448.7],[66.2,398.4]];
+const bushRightPoints = [[452.3,396.4],[508.7,401.4],[457.0,417.3],[498.2,435.5],[441.9,440.9],[531.2,407.9],[461.5,374.5],[426.4,415.9],[522.5,426.0],[496.0,375.0],[527.3,390.1],[435.1,386.6],[479.2,425.3],[463.5,444.0],[472.9,392.1]];
+const groundPetalPoints = [[195.3,465.7],[390.8,469.3],[352.6,473.8],[251.0,474.5],[486.9,461.9],[129.8,469.9],[474.5,477.9],[369.6,461.5],[168.1,479.1],[521.0,483.2],[317.0,473.6],[217.4,478.1],[108.1,470.1],[294.2,455.8],[442.2,460.2],[333.6,460.5],[410.8,476.5],[78.2,465.4],[515.5,463.3],[156.9,460.4],[282.6,473.0],[90.8,481.9],[499.9,480.8],[453.6,479.4],[259.6,456.4],[236.1,460.2],[431.3,478.5]];
 
-function renderTree(){
-  const now = new Date();
-  const daysElapsed = Math.max(0, Math.floor((now - datingDate) / 86400000));
-  const count = Math.min(treePoints.length, 5 + Math.floor(daysElapsed * 1.5));
-  const g = document.getElementById('tree-flowers');
+function renderFlowerGroup(groupId, points, count, sizeBase, cssClass){
+  const g = document.getElementById(groupId);
   g.innerHTML = '';
   for(let i=0;i<count;i++){
-    const [x,y] = treePoints[i];
+    const [x,y] = points[i];
     const emoji = flowers[i % flowers.length];
-    const size = 20 + (i % 4) * 3;
+    const size = sizeBase + (i % 4) * 3;
     const el = document.createElementNS('http://www.w3.org/2000/svg','text');
     el.setAttribute('x', x);
     el.setAttribute('y', y);
     el.setAttribute('font-size', size);
     el.setAttribute('text-anchor','middle');
-    el.setAttribute('class','tree-flower');
+    el.setAttribute('class', cssClass);
     el.style.animationDelay = (i * 0.05) + 's';
     el.textContent = emoji;
     g.appendChild(el);
   }
-  document.getElementById('tree-count').textContent = count;
+}
+
+/* ============ MILESTONES ============ */
+const metDate = new Date('2026-07-17T00:00:00');
+
+const milestoneDefs = [
+  { label:'1 Month',  icon:'🎉', unit:'months', amount:1,  msg:"One month of having you, my soulmate, and I can't wait for more ❤️" },
+  { label:'2 Months', icon:'💌', unit:'months', amount:2,  msg:"Two months of having you, my soulmate, and I already can't imagine life without you ❤️" },
+  { label:'3 Months', icon:'🌷', unit:'months', amount:3,  msg:"Three months of having you, my soulmate, and my love for you keeps growing ❤️" },
+  { label:'6 Months', icon:'💫', unit:'months', amount:6,  msg:"Half a year of having you, my soulmate, and every day still feels like a gift ❤️" },
+  { label:'9 Months', icon:'🌹', unit:'months', amount:9,  msg:"Nine months of having you, my soulmate, and I love you more than ever ❤️" },
+  { label:'1 Year',   icon:'🥂', unit:'years',  amount:1,  msg:"One year of having you, my soulmate, and I can't wait for a lifetime more ❤️" },
+  { label:'2 Years',  icon:'👑', unit:'years',  amount:2,  msg:"Two years of having you, my soulmate, and I'd choose you every single time ❤️" },
+];
+
+function addMonths(date, n){
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + n);
+  return d;
+}
+function addYears(date, n){
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() + n);
+  return d;
+}
+
+/* ============ OPEN WHEN... LETTERS ============ */
+const envelopes = [
+  {
+    icon: '🌼',
+    label: "Open when you're happy",
+    text: "Hi my baby, if you're opening this that means something good has happened or you're just having a good day, and I want you to know that every smile and feeling of joy you have, I feel it too in my heart. I want you to tell me all about it. I love you so much my baby, and I always want you to be happy."
+  },
+  {
+    icon: '💧',
+    label: "Open when you're sad",
+    text: "Hi my love, if you're opening this it means you're sad, and you being sad is the last thing I ever want you to be. My only wish is that I could hug you and comfort you better, but I want you to tell me about it. I'm here for you, I'm not going anywhere, and we will get through this moment together."
+  },
+  {
+    icon: '🌷',
+    label: "Open when you miss me",
+    text: "Hi my princess, if you're opening this it means you miss me, and I miss you too right now, more than you think. The distance is something temporary, yes it isn't easy at times, but we will push each other and support each other through it. I'm right here with you, and you're here with me, in my heart and soul."
+  },
+  {
+    icon: '🔥',
+    label: "Open when you need motivation",
+    text: "Hi my gorgeous girlfriend, if you're opening this it means you need motivation, and you're at the right place. I want you to know that you're so much stronger and more capable than what you think of yourself or give yourself credit for. Whatever it is, work or studies or anything else, being perfect at it is not a necessity, trying your best and continuing to go is the right way. I believe in you, my love. Now go and try again, or give yourself a break and try again later."
+  },
+  {
+    icon: '🌙',
+    label: "Open when you can't sleep",
+    text: "Hi my heart, if you're opening this it means you're having trouble sleeping. I want you to take a deep breath, inhale and exhale, for a few minutes. I heard if you blink fast it helps you sleep faster. But I want you to know, wherever I am, whatever I'm doing, even when I'm sleeping, I'm thinking of you. I love you so much. Goodnight, sweet dreams, my love."
+  },
+  {
+    icon: '🤍',
+    label: "Open when you need reassurance",
+    text: "Hi my soul, if you're opening this it means you're in need of reassurance. I want you to know that I am not going anywhere, and you mean the world to me. Our relationship is everything to me. You're mine, and I'm forever yours. I will always protect you, and if you're worrying about something, don't be afraid to tell me. I would rather us talk about it than let you overthink and worry on your own. I love you so much, my soulmate."
+  },
+  {
+    icon: '😂',
+    label: "Open when you need a laugh",
+    text: "Hi, the love of my life, if you're opening this it means you'd like to hear one of your boyfriend's extremely funny jokes, so I will tell you one. It is crazy how out of everything in the world, we bonded over the World Cup. I mean, out of everything in the world, and World Cup, get it? But this one isn't really a joke because I can't really think of one right now. But you know I'm extremely hilarious, and you're extremely funny too. I love you so much."
+  }
+];
+
+function renderEnvelopes(){
+  const grid = document.getElementById('envelope-grid');
+  grid.innerHTML = '';
+  envelopes.forEach(env=>{
+    const card = document.createElement('div');
+    card.className = 'envelope-card';
+    card.innerHTML = `
+      <div class="envelope-face">
+        <span class="envelope-icon">${env.icon}</span>
+        <span class="envelope-label">${env.label}</span>
+      </div>
+      <div class="envelope-letter">${env.text}</div>
+    `;
+    card.querySelector('.envelope-face').addEventListener('click', ()=>{
+      card.classList.toggle('open');
+    });
+    grid.appendChild(card);
+  });
+}
+
+function renderMilestones(){
+  const now = new Date();
+  const grid = document.getElementById('milestone-grid');
+  grid.innerHTML = '';
+
+  // find the most recently reached milestone (within the last 7 days) to highlight as "current"
+  let currentIdx = -1;
+  milestoneDefs.forEach((m, i)=>{
+    const target = m.unit === 'months' ? addMonths(metDate, m.amount) : addYears(metDate, m.amount);
+    const daysSinceReached = (now - target) / 86400000;
+    if(daysSinceReached >= 0 && daysSinceReached <= 7) currentIdx = i;
+  });
+
+  milestoneDefs.forEach((m, i)=>{
+    const target = m.unit === 'months' ? addMonths(metDate, m.amount) : addYears(metDate, m.amount);
+    const reached = now >= target;
+    const card = document.createElement('div');
+    card.className = 'milestone-card' + (reached ? ' reached' : ' locked') + (i === currentIdx ? ' current' : '');
+
+    const dateStr = target.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    let bodyHtml = `<span class="milestone-icon">${reached ? m.icon : '🔒'}</span>
+      <div class="milestone-label">${m.label}</div>
+      <div class="milestone-date">${dateStr}</div>`;
+
+    if(reached){
+      bodyHtml += `<div class="milestone-msg">${m.msg}</div>`;
+    } else {
+      const daysLeft = Math.ceil((target - now) / 86400000);
+      bodyHtml += `<div class="milestone-msg">${daysLeft} day${daysLeft===1?'':'s'} to go</div>`;
+    }
+    if(i === currentIdx){
+      bodyHtml = `<span class="milestone-badge">Just reached!</span>` + bodyHtml;
+    }
+    card.innerHTML = bodyHtml;
+    grid.appendChild(card);
+  });
+}
+
+function renderTree(){
+  const TREE_SLOTS = treePoints.length;
+  const BUSH_SLOTS = bushLeftPoints.length;
+  const GARDEN_SLOTS = TREE_SLOTS + BUSH_SLOTS*2;
+  const GROUND_SLOTS = groundPetalPoints.length;
+
+  const now = new Date();
+  const daysElapsed = Math.max(0, Math.floor((now - datingDate) / 86400000));
+  const rawGrowth = 5 + Math.floor(daysElapsed * 1.5);
+  const bloomCount = Math.min(GARDEN_SLOTS, rawGrowth);
+
+  const treeCount = Math.min(TREE_SLOTS, bloomCount);
+  const bushLeftCount = Math.min(BUSH_SLOTS, Math.max(0, bloomCount - TREE_SLOTS));
+  const bushRightCount = Math.min(BUSH_SLOTS, Math.max(0, bloomCount - TREE_SLOTS - BUSH_SLOTS));
+
+  renderFlowerGroup('tree-flowers', treePoints, treeCount, 20, 'tree-flower');
+  renderFlowerGroup('bush-left-flowers', bushLeftPoints, bushLeftCount, 16, 'tree-flower');
+  renderFlowerGroup('bush-right-flowers', bushRightPoints, bushRightCount, 16, 'tree-flower');
+
+  // once the whole garden is in full bloom, petals begin falling and accumulating on the ground
+  const daysToFullBloom = Math.ceil((GARDEN_SLOTS - 5) / 1.5);
+  let fallenCount = 0;
+  if(daysElapsed > daysToFullBloom){
+    fallenCount = Math.min(GROUND_SLOTS, Math.floor((daysElapsed - daysToFullBloom) * 1.2));
+  }
+  renderFlowerGroup('fallen-petals', groundPetalPoints, fallenCount, 15, 'petal-fallen');
+
+  document.getElementById('tree-count').textContent = bloomCount;
+  const fallenCaption = document.getElementById('fallen-caption');
+  fallenCaption.innerHTML = fallenCount > 0 ? `, <b>${fallenCount}</b> petals fallen and more still blooming` : '';
 }
 
 /* ============ 100 REASONS ============ */
@@ -1251,6 +1624,44 @@ function setupReasons(){
   });
 }
 
+/* ============ EASTER EGGS ============ */
+function showSecretToast(message){
+  const toast = document.getElementById('secret-toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(showSecretToast._t);
+  showSecretToast._t = setTimeout(()=>{ toast.classList.remove('show'); }, 4200);
+}
+
+function initEasterEggs(){
+  const numTwoTwo = document.getElementById('footer-22');
+  let tapCount = 0;
+  let tapTimer = null;
+  numTwoTwo.addEventListener('click', ()=>{
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(()=>{ tapCount = 0; }, 2000);
+    if(tapCount >= 2){
+      showSecretToast("You found our number 💫 22 will always be ours.");
+      tapCount = 0;
+    }
+  });
+
+  const flower = document.getElementById('footer-flower');
+  let flowerClicks = 0;
+  let flowerTimer = null;
+  flower.addEventListener('click', ()=>{
+    flowerClicks++;
+    clearTimeout(flowerTimer);
+    flowerTimer = setTimeout(()=>{ flowerClicks = 0; }, 2500);
+    if(flowerClicks >= 7){
+      showSecretToast("You found the secret 🌸 I love you more than every flower on this page.");
+      flowerClicks = 0;
+    }
+  });
+}
+initEasterEggs();
+
 /* ============ INIT AFTER UNLOCK ============ */
 function safeRun(fn, label){
   try{ fn(); }
@@ -1261,6 +1672,8 @@ function initAfterUnlock(){
   safeRun(tickCountdowns, 'tickCountdowns');
   safeRun(setupGfDay, 'setupGfDay');
   safeRun(renderTree, 'renderTree');
+  safeRun(renderMilestones, 'renderMilestones');
+  safeRun(renderEnvelopes, 'renderEnvelopes');
   safeRun(setupReasons, 'setupReasons');
 }
 </script>

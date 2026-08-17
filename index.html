@@ -518,6 +518,30 @@
   .chip .remove-x:hover{color:var(--red);}
   .tag-grid .chip{cursor:default;}
   .tag-grid .chip:hover{background:rgba(255,255,255,.05);}
+  .currently-watching-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    background:linear-gradient(120deg,rgba(255,107,133,.12),rgba(198,168,255,.1));
+    border:1.5px solid rgba(255,107,133,.3);
+    border-radius:16px;
+    padding:14px 18px;
+    margin-bottom:12px;
+  }
+  .cw-label{
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:.68rem;
+    font-weight:700;
+    color:var(--red);
+    white-space:nowrap;
+  }
+  .cw-value{
+    font-family:'Playfair Display',serif;
+    font-size:1.05rem;
+    color:var(--ink);
+  }
   .add-row{
     display:flex;
     gap:8px;
@@ -740,6 +764,46 @@
     padding:50px 20px 80px;
     color:var(--ink-soft);
     font-size:.85rem;
+  }
+  .footer-flower{
+    cursor:pointer;
+    display:inline-block;
+    transition:transform .15s ease;
+  }
+  .footer-flower:hover{transform:scale(1.2) rotate(10deg);}
+  .footer-22{
+    cursor:pointer;
+    display:inline-block;
+    opacity:.55;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .footer-22:hover{transform:scale(1.15); opacity:.9;}
+
+  #secret-toast{
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translateX(-50%) translateY(20px);
+    background:rgba(20,14,40,.92);
+    border:1px solid rgba(255,107,133,.4);
+    border-radius:16px;
+    padding:16px 24px;
+    max-width:min(86vw,380px);
+    text-align:center;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+    font-size:1rem;
+    color:var(--ink);
+    box-shadow:0 20px 50px -20px rgba(0,0,0,.7);
+    z-index:200;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  #secret-toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+    pointer-events:auto;
   }
 
   #music-widget{
@@ -1189,6 +1253,23 @@
         <button class="add-btn" id="food-add-btn">+ Add</button>
       </div>
     </div>
+
+    <div class="bucket-block">
+      <h3>🎬 Shows &amp; movies to watch together</h3>
+      <div class="currently-watching-card">
+        <span class="cw-label">Currently watching</span>
+        <span class="cw-value" id="cw-value">Nothing pinned yet</span>
+      </div>
+      <div class="add-row">
+        <input type="text" id="cw-input" placeholder="pin what we're watching now...">
+        <button class="add-btn" id="cw-save-btn">Pin it</button>
+      </div>
+      <div class="chip-grid" id="watchlist-list"></div>
+      <div class="add-row">
+        <input type="text" id="watchlist-add-input" placeholder="add a show or movie...">
+        <button class="add-btn" id="watchlist-add-btn">+ Add</button>
+      </div>
+    </div>
   </section>
 
   <section id="paragraph">
@@ -1245,10 +1326,11 @@ And now, you should answer the questions below. Have fun, mwah! ❤️😘</p>
     <div id="final-answer"></div>
   </section>
 
-<footer>F & Z ❤️</footer>
+<footer>F & Z <span id="footer-flower" class="footer-flower">🌸</span> <span id="footer-22" class="footer-22">22</span></footer>
 </div>
 
 <div id="bouquet-overlay"></div>
+<div id="secret-toast"></div>
 <script>
 /* ============ FIREBASE (shared cross-device bucket list) ============ */
 let db = null;
@@ -1437,8 +1519,9 @@ setInterval(updateTZ, 30000);
 const asiaCountries = ['Japan','South Korea','Thailand','Vietnam','Indonesia','Philippines','Singapore','Taiwan','China','India','Nepal','Sri Lanka','Cambodia','Laos','Maldives','UAE','Turkey','Jordan','Malaysia','Hong Kong','Mongolia','Bhutan','Georgia','Uzbekistan','Spain'];
 const petsList = ['Poodle 🐩','Doberman 🐕‍🦺','Golden Retriever 🐕'];
 const foods = ['Bulgogi 🥩','Seafood 🦐','Pasta 🍝','Cheesecake 🍰','Oreo cake 🍫','Crustless pie 🥧'];
+const watchlist = ['Stranger Things','The Office','Friends','Money Heist','Bridgerton','How I Met Your Mother'];
 
-let bucketData = { asiaChecked:{}, asiaCustom:[], petsChecked:{}, petsCustom:[], foodCustom:[] };
+let bucketData = { asiaChecked:{}, asiaCustom:[], petsChecked:{}, petsCustom:[], foodCustom:[], watchlistChecked:{}, watchlistCustom:[], currentlyWatching:'' };
 let bucketReady = false;
 const bucketListeners = [];
 
@@ -1449,7 +1532,10 @@ function ensureShape(data){
     asiaCustom: data.asiaCustom || [],
     petsChecked: data.petsChecked || {},
     petsCustom: data.petsCustom || [],
-    foodCustom: data.foodCustom || []
+    foodCustom: data.foodCustom || [],
+    watchlistChecked: data.watchlistChecked || {},
+    watchlistCustom: data.watchlistCustom || [],
+    currentlyWatching: data.currentlyWatching || ''
   };
 }
 
@@ -1547,6 +1633,26 @@ function initAddRow(inputId, btnId, addFn){
     addFn(input.value);
     input.value = '';
     input.focus();
+  }
+  btn.addEventListener('click', submit);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+}
+
+function initCurrentlyWatching(){
+  function renderCW(){
+    const val = bucketData.currentlyWatching;
+    document.getElementById('cw-value').textContent = val && val.trim() ? val : 'Nothing pinned yet';
+  }
+  bucketListeners.push(renderCW);
+  renderCW();
+
+  const input = document.getElementById('cw-input');
+  const btn = document.getElementById('cw-save-btn');
+  function submit(){
+    if(!input.value.trim()) return;
+    bucketData.currentlyWatching = input.value.trim();
+    saveBucketData();
+    input.value = '';
   }
   btn.addEventListener('click', submit);
   input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
@@ -1722,6 +1828,46 @@ function launchBouquet(){
   }
 }
 
+/* ============ EASTER EGGS ============ */
+function showSecretToast(message){
+  const toast = document.getElementById('secret-toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(showSecretToast._t);
+  showSecretToast._t = setTimeout(()=>{ toast.classList.remove('show'); }, 4200);
+}
+
+function initEasterEggs(){
+  // tapping the "22" in the footer twice
+  const numTwoTwo = document.getElementById('footer-22');
+  let tapCount = 0;
+  let tapTimer = null;
+  numTwoTwo.addEventListener('click', ()=>{
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(()=>{ tapCount = 0; }, 2000);
+    if(tapCount >= 2){
+      showSecretToast("You found our number 💫 22 will always be ours.");
+      tapCount = 0;
+    }
+  });
+
+  // clicking the footer flower several times
+  const flower = document.getElementById('footer-flower');
+  let flowerClicks = 0;
+  let flowerTimer = null;
+  flower.addEventListener('click', ()=>{
+    flowerClicks++;
+    clearTimeout(flowerTimer);
+    flowerTimer = setTimeout(()=>{ flowerClicks = 0; }, 2500);
+    if(flowerClicks >= 7){
+      showSecretToast("You found the secret 🌸 I love you more than every flower on this page.");
+      flowerClicks = 0;
+    }
+  });
+}
+initEasterEggs();
+
 /* ============ INIT AFTER UNLOCK ============ */
 function safeRun(fn, label){
   try{ fn(); }
@@ -1744,6 +1890,11 @@ function initAfterUnlock(){
     const addFood = buildChipList(document.getElementById('food-list'), foods, 'foodChecked', 'foodCustom', false);
     initAddRow('food-add-input','food-add-btn', addFood);
   }, 'foodList');
+  safeRun(()=>{
+    const addWatch = buildChipList(document.getElementById('watchlist-list'), watchlist, 'watchlistChecked', 'watchlistCustom', true);
+    initAddRow('watchlist-add-input','watchlist-add-btn', addWatch);
+    initCurrentlyWatching();
+  }, 'watchlist');
   safeRun(renderPuzzle, 'renderPuzzle');
 }
 </script>

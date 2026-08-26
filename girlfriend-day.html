@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Happy Girlfriend's Day 💜</title>
 <script src="https://www.youtube.com/iframe_api"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Caveat:wght@500;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -267,6 +269,59 @@
     color:var(--ink);
     min-height:20px;
   }
+
+  /* ---------- tic tac toe ---------- */
+  .ttt-card{text-align:center;}
+  .ttt-status{
+    font-family:'Playfair Display',serif;
+    font-size:1.15rem;
+    color:var(--ink);
+    margin-bottom:22px;
+    min-height:28px;
+  }
+  .ttt-board{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+    max-width:280px;
+    margin:0 auto;
+  }
+  .ttt-cell{
+    aspect-ratio:1;
+    background:rgba(255,255,255,.05);
+    border:1.5px solid var(--card-border);
+    border-radius:14px;
+    font-family:'Playfair Display',serif;
+    font-size:2.2rem;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .ttt-cell:hover{background:rgba(255,255,255,.1);}
+  .ttt-cell:active{transform:scale(.95);}
+  .ttt-cell.x{color:var(--red);}
+  .ttt-cell.o{color:var(--purple);}
+  .ttt-cell.win{
+    background:linear-gradient(160deg,rgba(255,107,133,.25),rgba(198,168,255,.2));
+    border-color:var(--red);
+  }
+  .ttt-reset{
+    display:inline-block;
+    margin-top:22px;
+    border:1.5px solid var(--card-border);
+    background:rgba(255,255,255,.05);
+    color:var(--ink);
+    padding:10px 24px;
+    border-radius:999px;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:.85rem;
+    cursor:pointer;
+  }
+  .ttt-reset:hover{border-color:var(--purple);}
 
   /* ---------- growing tree ---------- */
   .tree-sub{color:var(--ink-soft);margin-top:8px;margin-bottom:26px;max-width:520px;}
@@ -901,6 +956,67 @@
     pointer-events:auto;
   }
 
+  #anniversary-overlay{
+    position:fixed;
+    inset:0;
+    z-index:300;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #241A46 0%, #170F2E 55%, #100A20 100%);
+    padding:24px;
+    opacity:1;
+    transition:opacity .4s ease;
+  }
+  #anniversary-overlay.hidden{
+    display:none;
+  }
+  #anniversary-overlay.closing{
+    opacity:0;
+  }
+  .anniversary-card{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,107,133,.4);
+    border-radius:28px;
+    padding:48px 36px;
+    max-width:440px;
+    width:100%;
+    text-align:center;
+    backdrop-filter:blur(10px);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.7);
+    animation:annivPop .5s ease;
+  }
+  @keyframes annivPop{
+    0%{opacity:0; transform:scale(.85);}
+    100%{opacity:1; transform:scale(1);}
+  }
+  .anniversary-emoji{font-size:2.6rem;margin-bottom:10px;}
+  .anniversary-card h2{
+    font-size:1.6rem;
+    margin-bottom:16px;
+    background:linear-gradient(120deg,var(--red),var(--purple) 60%,var(--blue));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .anniversary-card p{
+    font-size:1rem;
+    line-height:1.6;
+    color:var(--ink);
+    margin-bottom:26px;
+  }
+  #anniversary-close{
+    border:none;
+    background:linear-gradient(120deg,var(--red),var(--purple));
+    color:#1a1130;
+    padding:13px 34px;
+    border-radius:999px;
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:.95rem;
+    cursor:pointer;
+  }
+
   #music-widget{
     position:fixed;
     top:18px;
@@ -1008,6 +1124,15 @@
 
 <div id="floating-emojis"></div>
 
+<div id="anniversary-overlay" class="hidden">
+  <div class="anniversary-card">
+    <div class="anniversary-emoji">🎉💜</div>
+    <h2>Happy 1 Month, My Love</h2>
+    <p id="anniversary-message">Happy 1 month, my love. One month ago today, everything changed for me, and it's only gotten better since. Here's to the next one, and every one after that. I love you so much, my soulmate.</p>
+    <button id="anniversary-close">Close</button>
+  </div>
+</div>
+
 <a href="#openwhen" id="openwhen-fab" class="hidden"><span class="fab-icon">💌</span> Open When...</a>
 
 <div id="yt-player-slot" style="position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;bottom:0;left:0;"></div>
@@ -1042,6 +1167,17 @@
       <button class="gf-btn" id="gf-btn-2">We love each other equally</button>
     </div>
     <div id="gf-reveal"></div>
+  </section>
+
+  <section id="tictactoe">
+    <div class="eyebrow">something to do together</div>
+    <h2>Tic Tac Toe</h2>
+    <p class="tree-sub">Same board, both devices. Take turns tapping.</p>
+    <div class="card ttt-card">
+      <div class="ttt-status" id="ttt-status">Loading board...</div>
+      <div class="ttt-board" id="ttt-board"></div>
+      <button class="ttt-reset" id="ttt-reset">New Game</button>
+    </div>
   </section>
 
   <section id="countdown">
@@ -1157,6 +1293,25 @@ Happy Girlfriend's Day, my baby, to the one and only forever best girlfriend and
 <div id="bouquet-overlay"></div>
 <div id="secret-toast"></div>
 <script>
+/* ============ FIREBASE (shared tic-tac-toe) ============ */
+let db = null;
+let tttDocRef = null;
+try{
+  const firebaseConfig = {
+    apiKey: "AIzaSyC77rRqbjoqXkS7n0ICgsXXWwUyUCfS5IU",
+    authDomain: "fandz-63761.firebaseapp.com",
+    projectId: "fandz-63761",
+    storageBucket: "fandz-63761.firebasestorage.app",
+    messagingSenderId: "62072564012",
+    appId: "1:62072564012:web:2c3d1c35986361e8c36489"
+  };
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  tttDocRef = db.collection('shared').doc('tictactoe');
+}catch(e){
+  console.error('Firebase failed to load, tic-tac-toe will run in local-only mode:', e);
+}
+
 /* ============ FLOATING EMOJI BACKGROUND ============ */
 const flowers = ['🌸','🌺','🌻','🌹','🌷','🌼','💮','🏵️','🪷'];
 const hearts = ['❤️','🧡','💛','💚','💙','💜','🩷','🩵','🩶','💕','💞','💓','💗','💖','💘','💝','❣️','💟'];
@@ -1198,6 +1353,7 @@ function tryUnlock(){
       siteEl.classList.remove('hidden');
       document.getElementById('openwhen-fab').classList.remove('hidden');
       initAfterUnlock();
+      initAnniversaryReveal();
     }, 480);
   } else {
     lockError.textContent = "Not quite... try again 💭";
@@ -1411,7 +1567,18 @@ const envelopes = [
 function renderEnvelopes(){
   const grid = document.getElementById('envelope-grid');
   grid.innerHTML = '';
-  envelopes.forEach(env=>{
+  const allEnvelopes = envelopes.slice();
+
+  const oneMonthUnlocked = new Date() >= new Date('2026-08-26T00:00:00');
+  if(oneMonthUnlocked){
+    allEnvelopes.push({
+      icon: '🎊',
+      label: "Open on our 1 month anniversary",
+      text: "Happy 1 month, my love. One month ago today, everything changed for me, and it's only gotten better since. Here's to the next one, and every one after that. I love you so much, my soulmate."
+    });
+  }
+
+  allEnvelopes.forEach(env=>{
     const card = document.createElement('div');
     card.className = 'envelope-card';
     card.innerHTML = `
@@ -1624,6 +1791,99 @@ function setupReasons(){
   });
 }
 
+/* ============ TIC TAC TOE ============ */
+const WIN_LINES = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+let tttState = { board: Array(9).fill(null), turn: 'X', winner: null, winLine: null };
+
+function checkWinner(board){
+  for(const line of WIN_LINES){
+    const [a,b,c] = line;
+    if(board[a] && board[a] === board[b] && board[a] === board[c]){
+      return { winner: board[a], line };
+    }
+  }
+  if(board.every(c => c)) return { winner: 'draw', line: null };
+  return null;
+}
+
+function renderTTT(){
+  const boardEl = document.getElementById('ttt-board');
+  const statusEl = document.getElementById('ttt-status');
+  boardEl.innerHTML = '';
+
+  tttState.board.forEach((val, i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'ttt-cell' + (val ? ' ' + val.toLowerCase() : '');
+    if(tttState.winLine && tttState.winLine.includes(i)) cell.classList.add('win');
+    cell.textContent = val || '';
+    cell.addEventListener('click', ()=>{
+      if(tttState.winner || tttState.board[i]) return;
+      tttState.board[i] = tttState.turn;
+      const result = checkWinner(tttState.board);
+      if(result){
+        tttState.winner = result.winner;
+        tttState.winLine = result.line;
+      } else {
+        tttState.turn = tttState.turn === 'X' ? 'O' : 'X';
+      }
+      saveTTT();
+    });
+    boardEl.appendChild(cell);
+  });
+
+  if(tttState.winner === 'draw'){
+    statusEl.textContent = "It's a draw! Play again?";
+  } else if(tttState.winner){
+    statusEl.textContent = tttState.winner + " wins! 🎉";
+  } else {
+    statusEl.textContent = tttState.turn + "'s turn";
+  }
+}
+
+function saveTTT(){
+  renderTTT();
+  if(!tttDocRef) return;
+  try{
+    tttDocRef.set(tttState).catch(e => console.error('TTT save failed:', e));
+  }catch(e){ console.error('TTT save failed:', e); }
+}
+
+function initTicTacToe(){
+  document.getElementById('ttt-reset').addEventListener('click', ()=>{
+    tttState = { board: Array(9).fill(null), turn: 'X', winner: null, winLine: null };
+    saveTTT();
+  });
+
+  if(!tttDocRef){
+    renderTTT();
+    return;
+  }
+  try{
+    tttDocRef.onSnapshot(snap => {
+      if(snap.exists){
+        const data = snap.data();
+        tttState = {
+          board: data.board || Array(9).fill(null),
+          turn: data.turn || 'X',
+          winner: data.winner || null,
+          winLine: data.winLine || null
+        };
+      }
+      renderTTT();
+    }, err => {
+      console.error('TTT listen failed:', err);
+      renderTTT();
+    });
+  }catch(e){
+    console.error('TTT listen failed:', e);
+    renderTTT();
+  }
+}
+
 /* ============ EASTER EGGS ============ */
 function showSecretToast(message){
   const toast = document.getElementById('secret-toast');
@@ -1662,6 +1922,24 @@ function initEasterEggs(){
 }
 initEasterEggs();
 
+/* ============ ONE MONTH ANNIVERSARY REVEAL ============ */
+function isOneMonthDay(){
+  const now = new Date();
+  return now.getFullYear() === 2026 && now.getMonth() === 7 && now.getDate() === 26;
+}
+
+function initAnniversaryReveal(){
+  if(!isOneMonthDay()) return;
+  const overlay = document.getElementById('anniversary-overlay');
+  overlay.classList.remove('hidden');
+  setTimeout(()=>{ launchBouquet(); }, 300);
+
+  document.getElementById('anniversary-close').addEventListener('click', ()=>{
+    overlay.classList.add('closing');
+    setTimeout(()=>{ overlay.classList.add('hidden'); }, 400);
+  });
+}
+
 /* ============ INIT AFTER UNLOCK ============ */
 function safeRun(fn, label){
   try{ fn(); }
@@ -1674,9 +1952,9 @@ function initAfterUnlock(){
   safeRun(renderTree, 'renderTree');
   safeRun(renderMilestones, 'renderMilestones');
   safeRun(renderEnvelopes, 'renderEnvelopes');
+  safeRun(initTicTacToe, 'initTicTacToe');
   safeRun(setupReasons, 'setupReasons');
 }
 </script>
 </body>
 </html>
-

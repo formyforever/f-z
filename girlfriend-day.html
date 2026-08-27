@@ -1693,7 +1693,7 @@ function renderEnvelopes(){
   grid.innerHTML = '';
   const allEnvelopes = envelopes.slice();
 
-  const oneMonthUnlocked = new Date() >= new Date('2026-08-26T00:00:00');
+  const oneMonthUnlocked = new Date() >= new Date('2026-08-27T00:00:00');
   if(oneMonthUnlocked){
     allEnvelopes.push({
       icon: '🎊',
@@ -2100,7 +2100,7 @@ initEasterEggs();
 /* ============ ONE MONTH ANNIVERSARY REVEAL ============ */
 function isOneMonthDay(){
   const now = new Date();
-  return now.getFullYear() === 2026 && now.getMonth() === 7 && now.getDate() === 26;
+  return now.getFullYear() === 2026 && now.getMonth() === 7 && now.getDate() === 27;
 }
 
 function initAnniversaryReveal(){
